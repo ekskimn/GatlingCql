@@ -5,7 +5,6 @@
     <version>0.0.8-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Gatling support for Apache Cassandra CQL</description>
-
     <repositories>
         <repository>
             <id>oss.sonatype.org-snapshot</id>
@@ -29,7 +28,6 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
-    
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
