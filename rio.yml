@@ -1,0 +1,68 @@
+schemaVersion: 2.0
+
+machine:
+  java:
+    version: 1.8
+
+notify:
+  email:
+    enabled: false
+    recipients: ['ekimn@apple.com']
+    buildFailuresToIndividuals: true
+    packageSuccessToDevelopers: true
+  pullRequestComment:
+    postOnSuccess: true
+    postOnFailure: true
+
+builds:
+  - # CI/CD Release build PROD
+    branchName: master
+
+    trigger:
+      gitPush: false
+
+    build:
+      template: buildozer:v1:publish
+      autoDistWorkspace: false
+      builders: ['java-maven-rio']
+
+    machine:
+      env:
+        snapshot: false
+
+    publish:
+      emailRecipients: ['ekimn@apple.com']
+      release: true
+      libraries:
+        repo:
+          m2:health
+
+    finally:
+      rioPublisher: true
+
+  - # CI/CD Non release build DEV
+    branchName: master
+
+    trigger:
+      gitPush: false
+
+    build:
+      template: buildozer:v1:publish
+      autoDistWorkspace: false
+      builders: ['java-maven-rio']
+
+    machine:
+      env:
+        snapshot: false
+
+    publish:
+      emailRecipients: ['ekimn@apple.com']
+      release: false
+      releaseTrain: 'SNAPSHOT'
+      libraries:
+        repo:
+          m2:health
+
+    finally:
+      rioPublisher: true
+

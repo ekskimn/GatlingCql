@@ -30,7 +30,7 @@ import io.github.gatling.cql.response.CqlResponse
 object CqlCheckBuilders
 {
 
-  private def responseExtender(): Extender[CqlCheck, CqlResponse] =
+  private def responseExtender(): Specializer[CqlCheck, CqlResponse] =
     (wrapped: Check[CqlResponse]) => CqlCheck(wrapped)
 
   val ResponseExtender = responseExtender()

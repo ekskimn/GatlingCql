@@ -46,7 +46,7 @@ trait CqlCheckSupport {
    * Note that this statement implicitly fetches <b>all</b> rows from the result set!
    */
   def columnValue(columnName: Expression[String]) =
-    new DefaultMultipleFindCheckBuilder[CqlCheck, CqlResponse, CqlResponse, Any](ResponseExtender, PassThroughResponsePreparer) {
+    new DefaultMultipleFindCheckBuilder[CqlCheck, CqlResponse, Any] {
       def findExtractor(occurrence: Int) = columnName.map(new SingleColumnValueExtractor(_, occurrence))
       def findAllExtractor = columnName.map(new MultipleColumnValueExtractor(_))
       def countExtractor = columnName.map(new CountColumnValueExtractor(_))

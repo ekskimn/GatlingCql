@@ -5,17 +5,56 @@
     <version>0.0.8-SNAPSHOT</version>
     <name>${project.artifactId}</name>
     <description>Gatling support for Apache Cassandra CQL</description>
-
+    
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <scala.version>2.11.8</scala.version>
+        <scala.version>2.12.2</scala.version>
+<!--
         <gatling.version>2.2.4</gatling.version>
         <gatling.maven-plugin.version>2.2.4</gatling.maven-plugin.version>
+-->
+        <gatling.version>3.0.0-SNAPSHOT</gatling.version>
+        <gatling.maven-plugin.version>3.0.0-SNAPSHOT</gatling.maven-plugin.version>
         <cassandra-driver.version>3.2.0</cassandra-driver.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>oss-sonatype</id>
+            <name>oss-sonatype</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>Apple_Artifactory-snapshots</name>
+            <url>https://artifacts.apple.com/health-snapshot-local</url>
+        </snapshotRepository>
+        <repository>
+            <id>central</id>
+            <name>Apple_Artifactory-releases</name>
+            <url>https://artifacts.apple.com/health-release-local</url>
+        </repository>
+    </distributionManagement>
+    
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>

@@ -41,7 +41,7 @@ class CqlRequestAction(val name: String, val next: Action, system: ActorSystem, 
     val stmt: Validation[Statement] = attr.statement(session)
 
     stmt.onFailure(err => {
-      statsEngine.logResponse(session, name, ResponseTimings(nowMillis, nowMillis), KO, None, Some("Error setting up statement: " + err), Nil)
+      statsEngine.logResponse(session, name, nowMillis, nowMillis, KO, None, Some("Error setting up statement: " + err), Nil)
       next ! session.markAsFailed
     })
 

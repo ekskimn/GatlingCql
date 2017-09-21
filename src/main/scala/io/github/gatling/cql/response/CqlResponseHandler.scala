@@ -42,7 +42,7 @@ class CqlResponseHandler(next: Action, session: Session, system: ActorSystem, st
   extends FutureCallback[ResultSet] with StrictLogging {
 
   private def writeData(status: Status, respTimings: ResponseTimings, message: Option[String]) =
-    statsEngine.logResponse(session, tag, respTimings, status, None, message, Nil)
+    statsEngine.logResponse(session, tag, respTimings.startTimestamp, respTimings.endTimestamp, status, None, message, Nil)
 
   def onSuccess(resultSet: ResultSet) = {
     val response = new CqlResponse(resultSet)

@@ -32,9 +32,9 @@ import io.github.gatling.cql.checks.CqlCheckBuilders._
 import io.github.gatling.cql.response.CqlResponse
 
 class CqlResponseFindCheckBuilder[X](extractor: Expression[Extractor[CqlResponse, X]])
-  extends FindCheckBuilder[CqlCheck, CqlResponse, CqlResponse, X] {
+  extends FindCheckBuilder[CqlCheck, CqlResponse, X] {
 
-  def find: ValidatorCheckBuilder[CqlCheck, CqlResponse, CqlResponse, X] = ValidatorCheckBuilder(ResponseExtender, PassThroughResponsePreparer, extractor)
+  def find: ValidatorCheckBuilder[CqlCheck, CqlResponse, X] = ValidatorCheckBuilder(extractor)
 }
 
 object CqlCheckBuilder {
