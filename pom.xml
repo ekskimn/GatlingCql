@@ -7,6 +7,20 @@
     <description>Gatling support for Apache Cassandra CQL</description>
     <repositories>
         <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>https://artifacts.apple.com/libs-release</url>
+        </repository>
+        <repository>
+            <snapshots />
+            <id>snapshots</id>
+            <name>libs-snapshot</name>
+            <url>https://artifacts.apple.com/libs-snapshot</url>
+        </repository>
+        <repository>
             <id>oss.sonatype.org-snapshot</id>
             <url>http://oss.sonatype.org/content/repositories/public</url>
             <releases>
@@ -63,10 +77,10 @@
         </dependency>
 
         <dependency>
-            <groupId>com.datastax.cassandra</groupId>
-            <artifactId>cassandra-driver-core</artifactId>
-            <version>${cassandra-driver.version}</version>
-            <classifier>shaded</classifier>
+            <groupId>com.apple.cie.db</groupId>
+            <artifactId>cassandraclient</artifactId>
+            <version>15.26.4</version>
+            <!--<classifier>shaded</classifier>-->
             <exclusions>
                 <!-- Provided by Gatling -->
                 <exclusion>
@@ -83,6 +97,28 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+<!--        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <version>${cassandra-driver.version}</version>
+            <classifier>shaded</classifier>
+            <exclusions>
+                &lt;!&ndash; Provided by Gatling &ndash;&gt;
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>-->
 
         <dependency>
             <groupId>io.gatling.highcharts</groupId>
