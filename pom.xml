@@ -165,8 +165,20 @@
                         <exclude>**/LICENSE</exclude>
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
+                        <exclude>.cicd/**</exclude>
+                        <exclude>.git/**</exclude>
+                        <exclude>.mvn/**</exclude>
+                        <exclude>target/**</exclude>
                         <exclude>**/*.xml</exclude>
                         <exclude>**/*.yml</exclude>
+                        <exclude>**/*.log</exclude>
+                        <exclude>**/*.library</exclude>
+                        <exclude>**/*.rio-env</exclude>
+                        <exclude>**/*.rio-user-env</exclude>
+                        <exclude>**/*.rio-yaml-segment</exclude>
+                        <exclude>**/mvnw</exclude>
+                        <exclude>**/mvnw.cmd</exclude>
+
                     </excludes>
                     <mapping>
                         <scala>SLASHSTAR_STYLE</scala>
