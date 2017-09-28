@@ -63,7 +63,7 @@ class CqlCompileTest extends Simulation {
   val scn = scenario("Two statements").repeat(1) {
     feed(feeder)
     .exec(http("GET").get("http://foo.bar/")
-            .check(bodyString)
+      .check(bodyString.transform(string => string.length).lessThan(100000))
     )
     .exec(cql("simple SELECT")
         .execute("SELECT * FROM test_table WHERE num = ${randomNum}")

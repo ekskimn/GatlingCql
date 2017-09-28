@@ -62,7 +62,7 @@ class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers wit
     val errorMessageCapture = new Capture[Some[String]]
     expecting {
       statement.apply(session).andReturn("OOPS".failure)
-      statsEngine.logResponse(eqAs(session), anyString, anyObject[ResponseTimings], eqAs(KO), eqAs(None), capture(errorMessageCapture), eqAs(Nil))
+      statsEngine.logResponse(eqAs(session), anyString, anyObject[Long], anyObject[Long], eqAs(KO), eqAs(None), capture(errorMessageCapture), eqAs(Nil))
     }
 
     whenExecuting(statement, statsEngine) {

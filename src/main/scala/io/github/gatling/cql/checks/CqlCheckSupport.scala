@@ -30,21 +30,32 @@ import io.github.gatling.cql.response.CqlResponse
 
 trait CqlCheckSupport {
   val exhausted = CqlCheckBuilder.Exhausted
+  implicit val exhaustedProvider = CqlCheckBuilders.ExhaustedProvider
+
   val applied = CqlCheckBuilder.Applied
+  implicit val appliedProvider = CqlCheckBuilders.AppliedProvider
 
   val executionInfo = CqlCheckBuilder.ExecutionInfo
+  implicit val executionInfoProvider = CqlCheckBuilders.ExecutionInfoProvider
+
   val resultSet = CqlCheckBuilder.ResultSet
+  implicit val resultSetProvider = CqlCheckBuilders.ResultSetProvider
+
+  val column = CqlCheckBuilder.ExecutionInfoExtractor
+
+  implicit val cqlCheckProvider = CqlCheckBuilders.CqlCheckProvider
 
   /**
-   * Get the number of all rows returned by the CQL statement.
-   * Note that this statement implicitly fetches <b>all</b> rows from the result set!
-   */
+    * Get the number of all rows returned by the CQL statement.
+    * Note that this statement implicitly fetches <b>all</b> rows from the result set!
+    */
   val rowCount = CqlCheckBuilder.RowCount
+  implicit val rowCountProvider = CqlCheckBuilders.RowCountProvider
 
   /**
-   * Get a column by name returned by the CQL statement.
-   * Note that this statement implicitly fetches <b>all</b> rows from the result set!
-   */
+    * Get a column by name returned by the CQL statement.
+    * Note that this statement implicitly fetches <b>all</b> rows from the result set!
+    */
   def columnValue(columnName: Expression[String]) =
     new DefaultMultipleFindCheckBuilder[CqlCheck, CqlResponse, Any] {
       def findExtractor(occurrence: Int) = columnName.map(new SingleColumnValueExtractor(_, occurrence))

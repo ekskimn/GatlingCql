@@ -36,10 +36,6 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
         <scala.version>2.12.2</scala.version>
-<!--
-        <gatling.version>2.2.4</gatling.version>
-        <gatling.maven-plugin.version>2.2.4</gatling.maven-plugin.version>
--->
         <gatling.version>3.0.0-SNAPSHOT</gatling.version>
         <gatling.maven-plugin.version>3.0.0-SNAPSHOT</gatling.maven-plugin.version>
         <cassandra-driver.version>3.2.0</cassandra-driver.version>
@@ -97,8 +93,8 @@
 
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
-            <version>2.2.4</version>
+            <artifactId>scalatest_2.12</artifactId>
+            <version>3.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -118,7 +114,7 @@
                 <!-- see http://davidb.github.com/scala-maven-plugin -->
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <goals>
