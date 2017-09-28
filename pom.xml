@@ -166,6 +166,7 @@
                         <exclude>src/test/resources/**</exclude>
                         <exclude>src/main/resources/**</exclude>
                         <exclude>**/*.xml</exclude>
+                        <exclude>**/*.yml</exclude>
                     </excludes>
                     <mapping>
                         <scala>SLASHSTAR_STYLE</scala>
