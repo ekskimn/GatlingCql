@@ -51,7 +51,7 @@ class CqlRequestAction(val name: String, val next: Action, system: ActorSystem, 
 
       val start = nowMillis
       val result = protocol.session.executeAsync(stmt)
-      Futures.addCallback(result, new CqlResponseHandler(next, session, system, statsEngine, start, attr.tag, stmt, attr.checks), MoreExecutors.sameThreadExecutor)
+      Futures.addCallback(result, new CqlResponseHandler(next, session, system, statsEngine, start, attr.tag, stmt, attr.checks), MoreExecutors.directExecutor())
     })
   }
 }
