@@ -22,27 +22,24 @@
  */
 package io.github.gatling.cql.checks
 
-import io.gatling.commons.validation.{SuccessWrapper, Validation}
-import io.gatling.core.check.extractor._
+import io.gatling.commons.validation.SuccessWrapper
+import io.gatling.core.check._
 import io.github.gatling.cql.response.CqlResponse
 
 
-abstract class ColumnValueExtractor[X] extends CriterionExtractor[CqlResponse, Any, X] { val criterionName = "columnValue" }
+abstract class ColumnValueExtractor[X] extends CriterionExtractor[CqlResponse, Any, X](checkName = "columnValue", criterion = "") { val criterionName = "columnValue" }
 
-class SingleColumnValueExtractor(val criterion: String, val occurrence: Int) extends ColumnValueExtractor[Any] with FindArity {
+class SingleColumnValueExtractor(val criterion: String, val occurrence: Int) extends
+  FindCriterionExtractor[CqlResponse, Any, Any](checkName = "columnValue",
+    criterion,
+    occurrence,
+    extractor = (prepared: CqlResponse) => prepared.column(criterion).lift(occurrence).success)
 
-  def apply(prepared: CqlResponse): Validation[Option[Any]] =
-    prepared.column(criterion).lift(occurrence).success
-}
+class MultipleColumnValueExtractor(val criterion: String) extends
+  FindAllCriterionExtractor[CqlResponse, Any, Any](checkName = "columnValue",
+    criterion,
+    extractor = (prepared: CqlResponse) => prepared.column(criterion).liftSeqOption.success)
 
-class MultipleColumnValueExtractor(val criterion: String) extends ColumnValueExtractor[Seq[Any]] with FindAllArity {
+class CountColumnValueExtractor(val criterion: String) extends CountCriterionExtractor[CqlResponse, Any](checkName = "", criterion,
+  extractor = (prepared: CqlResponse) => prepared.column(criterion).liftSeqOption.map(_.size).success)
 
-  def apply(prepared: CqlResponse): Validation[Option[Seq[Any]]] =
-    prepared.column(criterion).liftSeqOption.success
-}
-
-class CountColumnValueExtractor(val criterion: String) extends ColumnValueExtractor[Int] with CountArity {
-
-  def apply(prepared: CqlResponse): Validation[Option[Int]] =
-    prepared.column(criterion).liftSeqOption.map(_.size).success
-}

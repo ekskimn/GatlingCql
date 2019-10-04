@@ -22,12 +22,12 @@
  */
 package io.github.gatling.cql.checks
 
+import java.util
+
 import io.gatling.commons.validation.Validation
 import io.gatling.core.check.{Check, CheckResult}
 import io.gatling.core.session.Session
 import io.github.gatling.cql.response.CqlResponse
-
-import scala.collection.mutable
 
 /**
   * This class serves as model for the CQL-specific checks
@@ -36,8 +36,6 @@ import scala.collection.mutable
   */
 case class CqlCheck(wrapped: Check[CqlResponse])
   extends Check[CqlResponse] {
-
-  override def check(response: CqlResponse, session: Session)(implicit cache: mutable.Map[Any, Any]): Validation[CheckResult] =
-    wrapped.check(response, session)
+  def check(response: CqlResponse, session: Session, preparedCache: util.Map[Any, Any]): Validation[CheckResult] = wrapped.check(response, session, null)
 }
 

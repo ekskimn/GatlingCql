@@ -22,28 +22,29 @@
  */
 package cassandra
 
+import com.datastax.driver.core
+
 import scala.concurrent.duration.DurationInt
-
-import com.datastax.driver.core.Cluster
-import com.datastax.driver.core.ConsistencyLevel
-
+import com.datastax.driver.core.{Cluster, ConsistencyLevel, PreparedStatement}
 import io.gatling.core.Predef._
 import io.gatling.core.scenario.Simulation
-
 import io.github.gatling.cql.Predef._
+import io.github.gatling.cql.request.CqlProtocolBuilder
+
+import scala.util.Random
 
 
 class CassandraSimulation extends Simulation {
   val keyspace = "test"
   val table_name = "test_table"
-  val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
-  val session = cluster.connect() //Your C* session
+  val cluster: Cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+  val session: core.Session = cluster.connect() //Your C* session
   session.execute(s"""CREATE KEYSPACE IF NOT EXISTS $keyspace 
                       WITH replication = { 'class' : 'SimpleStrategy', 
                                           'replication_factor': '1'}""")
                                           
   session.execute(s"USE $keyspace")
-  val cqlConfig = cql.session(session) //Initialize Gatling DSL with your session
+  val cqlConfig: CqlProtocolBuilder = cql.session(session) //Initialize Gatling DSL with your session
 
   //Setup
   session.execute(s"""CREATE TABLE IF NOT EXISTS $table_name (
@@ -59,13 +60,13 @@ class CassandraSimulation extends Simulation {
 
 
   //Prepare your statement, we want to be effective, right?
-  val prepared = session.prepare(s"""INSERT INTO $table_name 
+  val prepared: PreparedStatement = session.prepare(s"""INSERT INTO $table_name
                                       (id, num, str) 
                                       VALUES 
                                       (now(), ?, ?)""")
 
-  val random = new util.Random
-  val feeder = Iterator.continually( 
+  val random: Random = new util.Random
+  val feeder: Iterator[Map[String, Any]] = Iterator.continually(
       // this feader will "feed" random data into our Sessions
       Map(
           "randomString" -> random.nextString(20), 
@@ -88,7 +89,7 @@ class CassandraSimulation extends Simulation {
         .consistencyLevel(ConsistencyLevel.ANY)) 
   }
 
-  setUp(scn.inject(rampUsersPerSec(10) to 100 during (30 seconds)))
+  setUp(scn.inject(rampUsersPerSec(rate1 = 10) to 100 during (30 seconds)))
     .protocols(cqlConfig)
 
   after(cluster.close())

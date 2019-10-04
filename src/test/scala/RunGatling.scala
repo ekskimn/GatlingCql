@@ -44,9 +44,8 @@ object RunGatling extends App
 
   val props = new GatlingPropertiesBuilder
 
-  props.dataDirectory(dataDirectory.toString)
+  props.resourcesDirectory(dataDirectory.toString)
   props.resultsDirectory(resultsDirectory.toString)
-  props.bodiesDirectory(bodiesDirectory.toString)
   props.binariesDirectory(mavenBinariesDirectory.toString)
 
   props.simulationClass("io.github.gatling.cql.CheckCompileTest")

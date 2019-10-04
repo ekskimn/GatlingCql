@@ -24,7 +24,7 @@ package io.github.gatling.cql.response
 
 import com.datastax.driver.core.{ResultSet, Row}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 abstract class Response
 
@@ -33,7 +33,7 @@ case class CqlResponseBase(resultSet: ResultSet)
 class CqlResponse(resultSet: ResultSet) extends CqlResponseBase(resultSet) {
 
   // implicit cache of all rows of the result set
-  private lazy val allRows:Seq[Row] = resultSet.all()
+  private lazy val allRows:Seq[Row] = resultSet.all().asScala
 
   /**
    * Get the number of all rows returned by the CQL statement.

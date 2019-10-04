@@ -25,33 +25,33 @@ package io.github.gatling.cql
 import akka.actor.ActorSystem
 import com.datastax.driver.core._
 import io.gatling.commons.stats.KO
+import io.gatling.commons.util.DefaultClock
 import io.gatling.commons.validation.{FailureWrapper, SuccessWrapper}
+import io.gatling.core.CoreComponents
 import io.gatling.core.action.Action
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.{Session => GSession}
 import io.gatling.core.stats.StatsEngine
-import io.gatling.core.stats.message.ResponseTimings
 import io.github.gatling.cql.checks.CqlCheck
-import io.github.gatling.cql.request.{CqlAttributes, CqlProtocol, CqlRequestAction}
+import io.github.gatling.cql.request.{CqlAttributes, CqlComponents, CqlProtocol, CqlRequestAction}
 import org.easymock.Capture
 import org.easymock.EasyMock.{anyObject, anyString, capture, reset, eq => eqAs}
+import org.scalatestplus.easymock.EasyMockSugar
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
-import org.scalatest.mock.EasyMockSugar
 
 class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers with BeforeAndAfter {
-  val config = GatlingConfiguration.loadForTest()
-  val cassandraSession = mock[Session]
-  val statement = mock[CqlStatement]
-  val system = mock[ActorSystem]
-  val statsEngine = mock[StatsEngine]
-  val nextAction = mock[Action]
-  val session = GSession("scenario", 1)
+  val config: GatlingConfiguration = GatlingConfiguration.loadForTest()
+  val cassandraSession: Session = mock[Session]
+  val statement: CqlStatement = mock[CqlStatement]
+  val system: ActorSystem = mock[ActorSystem]
+  val statsEngine: StatsEngine = mock[StatsEngine]
+  val nextAction: Action = mock[Action]
+  val session = GSession("scenario", 1, System.currentTimeMillis)
+  val coreComponents = CoreComponents(system, null, null, statsEngine, new DefaultClock, null, config)
 
   val target =
-    new CqlRequestAction("some-name", nextAction,
-      system,
-      statsEngine,
-      CqlProtocol(cassandraSession),
+    new CqlRequestAction(name = "some-name", nextAction,
+      CqlComponents(coreComponents, CqlProtocol(cassandraSession)),
       CqlAttributes("test", statement, ConsistencyLevel.ANY, ConsistencyLevel.SERIAL, List.empty[CqlCheck]))
 
   before {
@@ -62,7 +62,7 @@ class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers wit
     val errorMessageCapture = new Capture[Some[String]]
     expecting {
       statement.apply(session).andReturn("OOPS".failure)
-      statsEngine.logResponse(eqAs(session), anyString, anyObject[Long], anyObject[Long], eqAs(KO), eqAs(None), capture(errorMessageCapture), eqAs(Nil))
+      statsEngine.logResponse(eqAs(session), anyString, anyObject[Long], anyObject[Long], eqAs(KO), eqAs(None), capture(errorMessageCapture))
     }
 
     whenExecuting(statement, statsEngine) {
