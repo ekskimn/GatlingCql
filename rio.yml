@@ -7,7 +7,7 @@ machine:
 notify:
   email:
     enabled: false
-    recipients: ['ekimn@apple.com']
+    recipients: ['ekimn@apple.com', 'sameera_shah@apple.com']
     buildFailuresToIndividuals: true
     packageSuccessToDevelopers: true
   pullRequestComment:
@@ -31,7 +31,7 @@ builds:
         snapshot: false
 
     publish:
-      emailRecipients: ['ekimn@apple.com']
+      emailRecipients: ['ekimn@apple.com', 'sameera_shah@apple.com']
       release: true
       libraries:
         repo:
@@ -56,7 +56,7 @@ builds:
         snapshot: false
 
     publish:
-      emailRecipients: ['ekimn@apple.com']
+      emailRecipients: ['ekimn@apple.com', 'sameera_shah@apple.com']
       release: false
       releaseTrain: 'SNAPSHOT'
       libraries:
