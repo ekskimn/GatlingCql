@@ -22,7 +22,7 @@ builds:
       gitPush: false
 
     build:
-      template: buildozer:v1:publish
+      template: buildozer:v4:publish
       autoDistWorkspace: false
       builders: ['java-maven-rio']
 
@@ -47,7 +47,7 @@ builds:
       gitPush: false
 
     build:
-      template: buildozer:v1:publish
+      template: buildozer:v4:publish
       autoDistWorkspace: false
       builders: ['java-maven-rio']
 
