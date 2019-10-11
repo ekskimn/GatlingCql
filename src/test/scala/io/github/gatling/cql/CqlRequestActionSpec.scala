@@ -46,34 +46,35 @@ class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers wit
   val system: ActorSystem = mock[ActorSystem]
   val statsEngine: StatsEngine = mock[StatsEngine]
   val nextAction: Action = mock[Action]
-  val session = GSession("scenario", 1, System.currentTimeMillis)
-  val coreComponents = CoreComponents(system, null, null, statsEngine, new DefaultClock, null, config)
+  val session: GSession = GSession("scenario", 1, System.currentTimeMillis)
+  val coreComponents: CoreComponents = CoreComponents(system, null, null, statsEngine, new DefaultClock, null, config)
 
-  val target =
+  val target: CqlRequestAction =
     new CqlRequestAction(name = "some-name", nextAction,
-      CqlComponents(coreComponents, CqlProtocol(cassandraSession)),
-      CqlAttributes("test", statement, ConsistencyLevel.ANY, ConsistencyLevel.SERIAL, List.empty[CqlCheck]))
+      CqlComponents(coreComponents = coreComponents, cqlProtocol = CqlProtocol(cassandraSession)),
+      CqlAttributes(tag = "test", statement = statement, cl = ConsistencyLevel.ANY, serialCl = ConsistencyLevel.SERIAL, checks = List.empty[CqlCheck]))
 
   before {
     reset(statement, cassandraSession, statsEngine)
   }
 
   it should "fail if expression is invalid and return the error" in {
-    val errorMessageCapture = new Capture[Some[String]]
+    val errorMessageCapture: Capture[Some[String]] = new Capture[Some[String]]
     expecting {
       statement.apply(session).andReturn("OOPS".failure)
-      statsEngine.logResponse(eqAs(session), anyString, anyObject[Long], anyObject[Long], eqAs(KO), eqAs(None), capture(errorMessageCapture))
+      statsEngine.logResponse(session = eqAs(session), requestName = anyString, startTimestamp = anyObject[Long], endTimestamp = anyObject[Long], status = eqAs(KO), responseCode = eqAs(None),
+        message = capture(errorMessageCapture))
     }
 
     whenExecuting(statement, statsEngine) {
       target.execute(session)
     }
-    val captureErrorMessage = errorMessageCapture.getValue
+    val captureErrorMessage: Option[String] = errorMessageCapture.getValue
     captureErrorMessage.get should be("Error setting up statement: OOPS")
   }
 
   it should "execute a valid statement" in {
-    val statementCapture = new Capture[RegularStatement]
+    val statementCapture: Capture[RegularStatement] = new Capture[RegularStatement]
     expecting {
       statement.apply(session).andReturn(new SimpleStatement("select * from test").success)
       cassandraSession.executeAsync(capture(statementCapture)) andReturn mock[ResultSetFuture]
@@ -81,7 +82,7 @@ class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers wit
     whenExecuting(statement, cassandraSession) {
       target.execute(session)
     }
-    val capturedStatement = statementCapture.getValue
+    val capturedStatement: RegularStatement = statementCapture.getValue
     capturedStatement shouldBe a[SimpleStatement]
     capturedStatement.getConsistencyLevel shouldBe ConsistencyLevel.ANY
     capturedStatement.getQueryString should be("select * from test")
