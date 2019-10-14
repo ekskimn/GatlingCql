@@ -24,16 +24,16 @@ package io.github.gatling.cql.checks
 
 import com.datastax.driver.core.{ExecutionInfo, ResultSet}
 import io.gatling.commons.validation.SuccessWrapper
-import io.gatling.core.check.{CheckProtocolProvider, _}
+import io.gatling.core.check.{Check, CheckMaterializer, Preparer, Specializer}
 import io.github.gatling.cql.response.CqlResponse
 
 object CqlCheckBuilders {
-  val RowCountSpecializer = specializer()
-  val ResultSetSpecializer = specializer()
-  val ExecutionInfoSpecializer = specializer()
-  val AppliedSpecializer = specializer()
-  val ExhaustedSpecializer = specializer()
-  val ColumnSpecializer = specializer()
+  val RowCountSpecializer: Specializer[CqlCheck, CqlResponse] = specializer()
+  val ResultSetSpecializer: Specializer[CqlCheck, CqlResponse] = specializer()
+  val ExecutionInfoSpecializer: Specializer[CqlCheck, CqlResponse] = specializer()
+  val AppliedSpecializer: Specializer[CqlCheck, CqlResponse] = specializer()
+  val ExhaustedSpecializer: Specializer[CqlCheck, CqlResponse] = specializer()
+  val ColumnSpecializer: Specializer[CqlCheck, CqlResponse] = specializer()
 
   val RowCountPreparer: Preparer[CqlResponse, Int] = _.rowCount.success
   val ResultSetPreparer: Preparer[CqlResponse, ResultSet] = _.resultSet.success
@@ -49,56 +49,41 @@ object CqlCheckBuilders {
   private def responseExtender(): Specializer[CqlCheck, CqlResponse] =
     (wrapped: Check[CqlResponse]) => CqlCheck(wrapped)
 
-  val ResponseExtender = responseExtender()
+  val ResponseExtender: Specializer[CqlCheck, CqlResponse] = responseExtender()
 
   val PassThroughResponsePreparer: Preparer[CqlResponse, CqlResponse] = (r: CqlResponse) => r.success
 
-  class ColumnProvider(val name: String) extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, Seq[Any]] {
+  class ColumnProvider(val name: String) extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, Seq[Any]](specializer = ColumnSpecializer) {
     override def preparer: Preparer[CqlResponse, Seq[Any]] = ColumnPreparer(name)
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = ColumnSpecializer
   }
 
   object ColumnProvider {
-    def apply(name: String) = {
+    def apply(name: String): ColumnProvider = {
       new ColumnProvider(name)
     }
   }
 
-  object CqlCheckProvider extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, CqlResponse] {
+  object CqlCheckProvider extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, CqlResponse](specializer = responseExtender()) {
     override val preparer: Preparer[CqlResponse, CqlResponse] = PassThroughResponsePreparer
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = responseExtender()
   }
 
-  object ExecutionInfoProvider extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, ExecutionInfo] {
+  object ExecutionInfoProvider extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, ExecutionInfo](specializer = ExecutionInfoSpecializer) {
     override val preparer: Preparer[CqlResponse, ExecutionInfo] = ExecutionInfoPreparer
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = ExecutionInfoSpecializer
   }
 
-  object ResultSetProvider extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, ResultSet] {
+  object ResultSetProvider extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, ResultSet](specializer = ResultSetSpecializer) {
     override val preparer: Preparer[CqlResponse, ResultSet] = ResultSetPreparer
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = ResultSetSpecializer
   }
 
-  object RowCountProvider extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, Int] {
+  object RowCountProvider extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, Int](specializer = RowCountSpecializer) {
     override val preparer: Preparer[CqlResponse, Int] = RowCountPreparer
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = RowCountSpecializer
   }
 
-  object AppliedProvider extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, Boolean] {
+  object AppliedProvider extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, Boolean](specializer = AppliedSpecializer) {
     override val preparer: Preparer[CqlResponse, Boolean] = AppliedPreparer
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = AppliedSpecializer
   }
 
-  object ExhaustedProvider extends CheckProtocolProvider[CqlCheck, CqlCheck, CqlResponse, Boolean] {
+  object ExhaustedProvider extends CheckMaterializer[CqlCheck, CqlCheck, CqlResponse, Boolean](specializer = ExhaustedSpecializer) {
     override val preparer: Preparer[CqlResponse, Boolean] = ExhaustedPreparer
-
-    override val specializer: Specializer[CqlCheck, CqlResponse] = ExhaustedSpecializer
   }
-
 }

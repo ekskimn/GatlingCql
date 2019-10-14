@@ -22,22 +22,25 @@
  */
 package io.github.gatling.cql
 
+import com.datastax.driver.core
+
 import scala.concurrent.duration.DurationInt
-
-import com.datastax.driver.core.{ConsistencyLevel, Cluster}
-
+import com.datastax.driver.core.{Cluster, ConsistencyLevel, PreparedStatement}
 import io.gatling.core.Predef._
 import io.gatling.core.scenario.Simulation
+import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.http.Predef._
-
 import io.github.gatling.cql.Predef._
+import io.github.gatling.cql.request.CqlProtocolBuilder
+
+import scala.util.Random
 
 class CqlCompileTest extends Simulation {
-  val keyspace = "test"
-  val table_name = "test_table"
-  val cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
-  val session = cluster.connect(s"$keyspace")
-  val cqlConfig = cql.session(session)
+  val keyspace: String = "test"
+  val table_name: String = "test_table"
+  val cluster: Cluster = Cluster.builder().addContactPoint("127.0.0.1").build()
+  val session: core.Session = cluster.connect(s"$keyspace")
+  val cqlConfig: CqlProtocolBuilder = cql.session(session)
 
   session.execute(s"CREATE KEYSPACE IF NOT EXISTS $keyspace WITH replication = { 'class' : 'SimpleStrategy', 'replication_factor': '1'}")
   session.execute(s"""CREATE TABLE IF NOT EXISTS $table_name (
@@ -49,10 +52,10 @@ class CqlCompileTest extends Simulation {
       """)
   session.execute(f"CREATE INDEX IF NOT EXISTS $table_name%s_num_idx ON $table_name%s (num)")
 
-  val prepared = session.prepare(s"INSERT INTO $table_name (id, num, str) values (now(), ?, ?)")
+  val prepared: PreparedStatement = session.prepare(s"INSERT INTO $table_name (id, num, str) values (now(), ?, ?)")
 
-  val random = new util.Random
-  val feeder = Iterator.continually(
+  val random: Random = new util.Random
+  val feeder: Iterator[Map[String, Any]] = Iterator.continually(
       Map(
         "randomString" -> random.nextString(20),
         "randomNum" -> random.nextInt(),
@@ -60,16 +63,16 @@ class CqlCompileTest extends Simulation {
       )
   )
 
-  val scn = scenario("Two statements").repeat(1) {
+  val scn: ScenarioBuilder = scenario(scenarioName = "Two statements").repeat(times = 1) {
     feed(feeder)
-    .exec(http("GET").get("http://foo.bar/")
-      .check(bodyString.transform(string => string.length).lessThan(100000))
+    .exec(http(requestName = "GET").get("http://foo.bar/")
+      .check(bodyString.transform(string => string.length).lt(expected = 100000))
     )
-    .exec(cql("simple SELECT")
-        .execute("SELECT * FROM test_table WHERE num = ${randomNum}")
+    .exec(cql(tag = "simple SELECT")
+        .execute(statement = "SELECT * FROM test_table WHERE num = ${randomNum}")
         .check(exhausted is false)
         .check(applied is false)
-        .check(columnValue("num").count.greaterThan(1))
+        .check(columnValue(columnName = "num").count.gt(expected = 1))
     )
 
 /*
@@ -90,20 +93,19 @@ class CqlCompileTest extends Simulation {
         })
 */
 
-    .exec(cql("prepared INSERT")
+    .exec(cql(tag = "prepared INSERT")
         .execute(prepared)
         .withParams(Integer.valueOf(random.nextInt()), "${randomString}")
         .consistencyLevel(ConsistencyLevel.ANY)
     )
 
-    .exec(cql("adhoc statements with params")
-      .execute("INSERT INTO $table_name (id, num, str) values (now(), ?, ?)", "${randomParams}")
+    .exec(cql(tag = "adhoc statements with params")
+      .execute(statement = "INSERT INTO $table_name (id, num, str) values (now(), ?, ?)", params = "${randomParams}")
       .consistencyLevel(ConsistencyLevel.ANY)
     )
   }
 
-  setUp(scn.inject(rampUsersPerSec(10) to 100 during (30 seconds)))
+  setUp(scn.inject(rampUsersPerSec(rate1 = 10) to 100 during (30 seconds)))
     .protocols(cqlConfig)
-
   after(cluster.close())
 }

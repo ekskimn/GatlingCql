@@ -26,23 +26,22 @@ import org.scalatest.FlatSpec
 import org.scalatest.Matchers
 import io.gatling.commons.validation._
 import io.gatling.core.session.el.ElCompiler
-import io.gatling.core.session.Session
+import io.gatling.core.session.{Expression, Session}
 
 class SimpleCqlStatementSpec extends FlatSpec with Matchers {
-    val el = ElCompiler.compile[String]("select * from test where id = ${test}")
-    val target = SimpleCqlStatement(el)
-    
-    "SimpleCqlStatement" should "correctly return SimpleStatement for a valid expression" in {
-      val session = new Session("name", 1, Map("test" -> "5"))
-      val result = target(session) 
-      result shouldBe a[Success[_]]
-      //result.get.getQueryString() shouldBe "select * from test where id = 5"
-      //NOTE: Statement.getQueryString() no longer present in 3.0.2
-    }
-    
-    it should "fail if the expression is wrong" in {
-      val session = new Session("name", 1, Map("test2" -> "5"))
-      target(session) shouldBe "No attribute named 'test' is defined".failure 
-    }
+  val el: Expression[String] = ElCompiler.compile[String]("select * from test where id = ${test}")
+  val target: SimpleCqlStatement = SimpleCqlStatement(el)
 
+  "SimpleCqlStatement" should "correctly return SimpleStatement for a valid expression" in {
+    val session = new Session("name", 1, System.currentTimeMillis, Map("test" -> "5"))
+    val result = target(session)
+    result shouldBe a[Success[_]]
+    //result.get.getQueryString() shouldBe "select * from test where id = 5"
+    //NOTE: Statement.getQueryString() no longer present in 3.0.2
+  }
+
+  it should "fail if the expression is wrong" in {
+    val session = new Session("name", 1, System.currentTimeMillis, Map("test2" -> "5"))
+    target(session) shouldBe "No attribute named 'test' is defined".failure
+  }
 }

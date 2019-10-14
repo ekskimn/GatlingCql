@@ -22,7 +22,6 @@
  */
 package io.github.gatling.cql.request
 
-import akka.actor.ActorSystem
 import com.datastax.driver.core.{Session => CqlSession}
 import io.gatling.core.CoreComponents
 import io.gatling.core.config.GatlingConfiguration
@@ -30,7 +29,11 @@ import io.gatling.core.protocol.{Protocol, ProtocolComponents, ProtocolKey}
 import io.gatling.core.session.Session
 
 object CqlProtocol {
-  val CqlProtocolKey = new ProtocolKey {
+  val CqlProtocolKey: ProtocolKey[CqlProtocol, CqlComponents] {
+    type Protocol = CqlProtocol
+
+    type Components = CqlComponents
+  } = new ProtocolKey[CqlProtocol, CqlComponents] {
 
     type Protocol = CqlProtocol
     type Components = CqlComponents
@@ -39,16 +42,16 @@ object CqlProtocol {
 
     def defaultProtocolValue(configuration: GatlingConfiguration): CqlProtocol = throw new IllegalStateException("Can't provide a default value for CqlProtocol")
 
-    def newComponents(system: ActorSystem, coreComponents: CoreComponents): CqlProtocol => CqlComponents = cqlProtocol => CqlComponents(cqlProtocol)
+    def newComponents(coreComponents: CoreComponents): CqlProtocol => CqlComponents = cqlProtocol => CqlComponents(coreComponents, cqlProtocol)
   }
 }
 
 //holds reference to a cluster, just settings
 case class CqlProtocol(session: CqlSession) extends Protocol
 
-case class CqlComponents(cqlProtocol: CqlProtocol) extends ProtocolComponents {
+case class CqlComponents(coreComponents: CoreComponents, cqlProtocol: CqlProtocol) extends ProtocolComponents {
 
-  def onStart: Option[Session => Session] = None
+  def onStart: Session => Session = ProtocolComponents.NoopOnStart
 
-  def onExit: Option[Session => Unit] = None
+  def onExit: Session => Unit = ProtocolComponents.NoopOnExit
 }

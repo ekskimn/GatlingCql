@@ -7,7 +7,7 @@ machine:
 notify:
   email:
     enabled: false
-    recipients: ['ekimn@apple.com']
+    recipients: ['galaxy-server-qe@group.apple.com']
     buildFailuresToIndividuals: true
     packageSuccessToDevelopers: true
   pullRequestComment:
@@ -22,7 +22,7 @@ builds:
       gitPush: false
 
     build:
-      template: buildozer:v1:publish
+      template: buildozer:v4:publish
       autoDistWorkspace: false
       builders: ['java-maven-rio']
 
@@ -31,7 +31,7 @@ builds:
         snapshot: false
 
     publish:
-      emailRecipients: ['ekimn@apple.com']
+      emailRecipients: ['galaxy-server-qe@group.apple.com']
       release: true
       libraries:
         repo:
@@ -47,7 +47,7 @@ builds:
       gitPush: false
 
     build:
-      template: buildozer:v1:publish
+      template: buildozer:v4:publish
       autoDistWorkspace: false
       builders: ['java-maven-rio']
 
@@ -56,7 +56,7 @@ builds:
         snapshot: false
 
     publish:
-      emailRecipients: ['ekimn@apple.com']
+      emailRecipients: ['galaxy-server-qe@group.apple.com']
       release: false
       releaseTrain: 'SNAPSHOT'
       libraries:

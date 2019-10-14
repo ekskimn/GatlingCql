@@ -25,55 +25,56 @@ package io.github.gatling.cql
 import akka.actor.ActorSystem
 import com.datastax.driver.core._
 import io.gatling.commons.stats.KO
+import io.gatling.commons.util.DefaultClock
 import io.gatling.commons.validation.{FailureWrapper, SuccessWrapper}
+import io.gatling.core.CoreComponents
 import io.gatling.core.action.Action
 import io.gatling.core.config.GatlingConfiguration
 import io.gatling.core.session.{Session => GSession}
 import io.gatling.core.stats.StatsEngine
-import io.gatling.core.stats.message.ResponseTimings
 import io.github.gatling.cql.checks.CqlCheck
-import io.github.gatling.cql.request.{CqlAttributes, CqlProtocol, CqlRequestAction}
+import io.github.gatling.cql.request.{CqlAttributes, CqlComponents, CqlProtocol, CqlRequestAction}
 import org.easymock.Capture
 import org.easymock.EasyMock.{anyObject, anyString, capture, reset, eq => eqAs}
+import org.scalatestplus.easymock.EasyMockSugar
 import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
-import org.scalatest.mock.EasyMockSugar
 
 class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers with BeforeAndAfter {
-  val config = GatlingConfiguration.loadForTest()
-  val cassandraSession = mock[Session]
-  val statement = mock[CqlStatement]
-  val system = mock[ActorSystem]
-  val statsEngine = mock[StatsEngine]
-  val nextAction = mock[Action]
-  val session = GSession("scenario", 1)
+  val config: GatlingConfiguration = GatlingConfiguration.loadForTest()
+  val cassandraSession: Session = mock[Session]
+  val statement: CqlStatement = mock[CqlStatement]
+  val system: ActorSystem = mock[ActorSystem]
+  val statsEngine: StatsEngine = mock[StatsEngine]
+  val nextAction: Action = mock[Action]
+  val session: GSession = GSession("scenario", 1, System.currentTimeMillis)
+  val coreComponents: CoreComponents = CoreComponents(system, null, null, statsEngine, new DefaultClock, null, config)
 
-  val target =
-    new CqlRequestAction("some-name", nextAction,
-      system,
-      statsEngine,
-      CqlProtocol(cassandraSession),
-      CqlAttributes("test", statement, ConsistencyLevel.ANY, ConsistencyLevel.SERIAL, List.empty[CqlCheck]))
+  val target: CqlRequestAction =
+    new CqlRequestAction(name = "some-name", nextAction,
+      CqlComponents(coreComponents = coreComponents, cqlProtocol = CqlProtocol(cassandraSession)),
+      CqlAttributes(tag = "test", statement = statement, cl = ConsistencyLevel.ANY, serialCl = ConsistencyLevel.SERIAL, checks = List.empty[CqlCheck]))
 
   before {
     reset(statement, cassandraSession, statsEngine)
   }
 
   it should "fail if expression is invalid and return the error" in {
-    val errorMessageCapture = new Capture[Some[String]]
+    val errorMessageCapture: Capture[Some[String]] = new Capture[Some[String]]
     expecting {
       statement.apply(session).andReturn("OOPS".failure)
-      statsEngine.logResponse(eqAs(session), anyString, anyObject[Long], anyObject[Long], eqAs(KO), eqAs(None), capture(errorMessageCapture), eqAs(Nil))
+      statsEngine.logResponse(session = eqAs(session), requestName = anyString, startTimestamp = anyObject[Long], endTimestamp = anyObject[Long], status = eqAs(KO), responseCode = eqAs(None),
+        message = capture(errorMessageCapture))
     }
 
     whenExecuting(statement, statsEngine) {
       target.execute(session)
     }
-    val captureErrorMessage = errorMessageCapture.getValue
+    val captureErrorMessage: Option[String] = errorMessageCapture.getValue
     captureErrorMessage.get should be("Error setting up statement: OOPS")
   }
 
   it should "execute a valid statement" in {
-    val statementCapture = new Capture[RegularStatement]
+    val statementCapture: Capture[RegularStatement] = new Capture[RegularStatement]
     expecting {
       statement.apply(session).andReturn(new SimpleStatement("select * from test").success)
       cassandraSession.executeAsync(capture(statementCapture)) andReturn mock[ResultSetFuture]
@@ -81,7 +82,7 @@ class CqlRequestActionSpec extends FlatSpec with EasyMockSugar with Matchers wit
     whenExecuting(statement, cassandraSession) {
       target.execute(session)
     }
-    val capturedStatement = statementCapture.getValue
+    val capturedStatement: RegularStatement = statementCapture.getValue
     capturedStatement shouldBe a[SimpleStatement]
     capturedStatement.getConsistencyLevel shouldBe ConsistencyLevel.ANY
     capturedStatement.getQueryString should be("select * from test")

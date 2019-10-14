@@ -22,46 +22,44 @@
  */
 package io.github.gatling.cql.checks
 
+import com.datastax.driver.core.{ExecutionInfo, ResultSet}
 import io.gatling.core.check._
 import io.gatling.core.session.{Expression, RichExpression}
-
-import io.github.gatling.cql.checks.CqlCheckBuilders._
 import io.github.gatling.cql.response.CqlResponse
 
 trait CqlCheckSupport {
-  val exhausted = CqlCheckBuilder.Exhausted
-  implicit val exhaustedProvider = CqlCheckBuilders.ExhaustedProvider
+  val exhausted: CqlResponseFindCheckBuilder[Boolean] = CqlCheckBuilder.Exhausted
+  implicit val exhaustedProvider: CqlCheckBuilders.ExhaustedProvider.type = CqlCheckBuilders.ExhaustedProvider
 
-  val applied = CqlCheckBuilder.Applied
-  implicit val appliedProvider = CqlCheckBuilders.AppliedProvider
+  val applied: CqlResponseFindCheckBuilder[Boolean] = CqlCheckBuilder.Applied
+  implicit val appliedProvider: CqlCheckBuilders.AppliedProvider.type = CqlCheckBuilders.AppliedProvider
 
-  val executionInfo = CqlCheckBuilder.ExecutionInfo
-  implicit val executionInfoProvider = CqlCheckBuilders.ExecutionInfoProvider
+  val executionInfo: CqlResponseFindCheckBuilder[ExecutionInfo] = CqlCheckBuilder.ExecutionInfo
+  implicit val executionInfoProvider: CqlCheckBuilders.ExecutionInfoProvider.type = CqlCheckBuilders.ExecutionInfoProvider
 
-  val resultSet = CqlCheckBuilder.ResultSet
-  implicit val resultSetProvider = CqlCheckBuilders.ResultSetProvider
+  val resultSet: CqlResponseFindCheckBuilder[ResultSet] = CqlCheckBuilder.ResultSet
+  implicit val resultSetProvider: CqlCheckBuilders.ResultSetProvider.type = CqlCheckBuilders.ResultSetProvider
 
-  val column = CqlCheckBuilder.ExecutionInfoExtractor
+  val column: Expression[Extractor[CqlResponse, ExecutionInfo]] = CqlCheckBuilder.ExecutionInfoExtractor
 
-  implicit val cqlCheckProvider = CqlCheckBuilders.CqlCheckProvider
+  implicit val cqlCheckProvider: CqlCheckBuilders.CqlCheckProvider.type = CqlCheckBuilders.CqlCheckProvider
 
   /**
     * Get the number of all rows returned by the CQL statement.
     * Note that this statement implicitly fetches <b>all</b> rows from the result set!
     */
-  val rowCount = CqlCheckBuilder.RowCount
-  implicit val rowCountProvider = CqlCheckBuilders.RowCountProvider
+  val rowCount: CqlResponseFindCheckBuilder[Int] = CqlCheckBuilder.RowCount
+  implicit val rowCountProvider: CqlCheckBuilders.RowCountProvider.type = CqlCheckBuilders.RowCountProvider
 
   /**
     * Get a column by name returned by the CQL statement.
     * Note that this statement implicitly fetches <b>all</b> rows from the result set!
     */
-  def columnValue(columnName: Expression[String]) =
-    new DefaultMultipleFindCheckBuilder[CqlCheck, CqlResponse, Any] {
-      def findExtractor(occurrence: Int) = columnName.map(new SingleColumnValueExtractor(_, occurrence))
-      def findAllExtractor = columnName.map(new MultipleColumnValueExtractor(_))
-      def countExtractor = columnName.map(new CountColumnValueExtractor(_))
+  def columnValue(columnName: Expression[String]): DefaultMultipleFindCheckBuilder[CqlCheck, CqlResponse, Any] =
+    new DefaultMultipleFindCheckBuilder[CqlCheck, CqlResponse, Any](displayActualValue = true) {
+      def findExtractor(occurrence: Int): Expression[SingleColumnValueExtractor] = columnName.map(new SingleColumnValueExtractor(_, occurrence))
+      def findAllExtractor: Expression[MultipleColumnValueExtractor] = columnName.map(new MultipleColumnValueExtractor(_))
+      def countExtractor: Expression[CountColumnValueExtractor] = columnName.map(new CountColumnValueExtractor(_))
     }
-
 }
 

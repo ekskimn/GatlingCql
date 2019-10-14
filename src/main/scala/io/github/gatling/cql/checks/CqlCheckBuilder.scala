@@ -24,22 +24,18 @@ package io.github.gatling.cql.checks
 
 import com.datastax.driver.core.{ExecutionInfo, ResultSet}
 import io.gatling.commons.validation.{SuccessWrapper, Validation}
-import io.gatling.core.check.extractor.{Extractor, SingleArity}
-import io.gatling.core.check.{FindCheckBuilder, ValidatorCheckBuilder}
-import io.gatling.core.session.{Expression, ExpressionSuccessWrapper}
-
-import io.github.gatling.cql.checks.CqlCheckBuilders._
+import io.gatling.core.check.{Extractor, FindCheckBuilder, ValidatorCheckBuilder}
+import io.gatling.core.session._
 import io.github.gatling.cql.response.CqlResponse
 
-class CqlResponseFindCheckBuilder[X](extractor: Expression[Extractor[CqlResponse, X]])
-  extends FindCheckBuilder[CqlCheck, CqlResponse, X] {
-
-  def find: ValidatorCheckBuilder[CqlCheck, CqlResponse, X] = ValidatorCheckBuilder(extractor)
+class CqlResponseFindCheckBuilder[X](extractor: Expression[Extractor[CqlResponse, X]]) extends FindCheckBuilder[CqlCheck, CqlResponse, X] {
+  def find: ValidatorCheckBuilder[CqlCheck, CqlResponse, X] = ValidatorCheckBuilder(extractor, displayActualValue = true)
 }
 
 object CqlCheckBuilder {
 
-  val ExecutionInfoExtractor = new Extractor[CqlResponse, ExecutionInfo] with SingleArity {
+  val ExecutionInfoExtractor: Expression[Extractor[CqlResponse, ExecutionInfo]] = new Extractor[CqlResponse, ExecutionInfo] {
+    val arity = "executionInfo"
     val name = "executionInfo"
     def apply(prepared: CqlResponse): Validation[Option[ExecutionInfo]] = {
       Some(prepared.resultSet.getExecutionInfo).success
@@ -48,10 +44,9 @@ object CqlCheckBuilder {
 
   val ExecutionInfo = new CqlResponseFindCheckBuilder[ExecutionInfo](ExecutionInfoExtractor)
 
-
-
-  val ResultSetExtractor = new Extractor[CqlResponse, ResultSet] with SingleArity {
+  val ResultSetExtractor: Expression[Extractor[CqlResponse, ResultSet]] = new Extractor[CqlResponse, ResultSet] {
     val name = "executionInfo"
+    val arity = "executionInfo"
     def apply(prepared: CqlResponse): Validation[Option[ResultSet]] = {
       Some(prepared.resultSet).success
     }
@@ -59,10 +54,9 @@ object CqlCheckBuilder {
 
   val ResultSet = new CqlResponseFindCheckBuilder[ResultSet](ResultSetExtractor)
 
-
-
-  val RowCountExtractor = new Extractor[CqlResponse, Int] with SingleArity {
+  val RowCountExtractor: Expression[Extractor[CqlResponse, Int]] = new Extractor[CqlResponse, Int] {
     val name = "rowCount"
+    val arity = "rowCount"
     def apply(prepared: CqlResponse): Validation[Option[Int]] = {
       Some(prepared.rowCount).success
     }
@@ -70,10 +64,9 @@ object CqlCheckBuilder {
 
   val RowCount = new CqlResponseFindCheckBuilder[Int](RowCountExtractor)
 
-
-
-  val AppliedExtractor = new Extractor[CqlResponse, Boolean] with SingleArity {
+  val AppliedExtractor: Expression[Extractor[CqlResponse, Boolean]] = new Extractor[CqlResponse, Boolean] {
     val name = "applied"
+    val arity = "applied"
     def apply(prepared: CqlResponse): Validation[Option[Boolean]] = {
       Some(prepared.resultSet.wasApplied()).success
     }
@@ -81,10 +74,9 @@ object CqlCheckBuilder {
 
   val Applied = new CqlResponseFindCheckBuilder[Boolean](AppliedExtractor)
 
-
-
-  val ExhaustedExtractor = new Extractor[CqlResponse, Boolean] with SingleArity {
+  val ExhaustedExtractor: Expression[Extractor[CqlResponse, Boolean]] = new Extractor[CqlResponse, Boolean] {
     val name = "exhausted"
+    val arity = "exhausted"
     def apply(prepared: CqlResponse): Validation[Option[Boolean]] = {
       Some(prepared.resultSet.isExhausted).success
     }
