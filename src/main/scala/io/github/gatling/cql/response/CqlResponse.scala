@@ -39,7 +39,7 @@ class CqlResponse(resultSet: ResultSet) extends CqlResponseBase(resultSet) {
    * Get the number of all rows returned by the CQL statement.
    * Note that this statement implicitly fetches <b>all</b> rows from the result set!
    */
-  def rowCount = allRows.length
+  def rowCount: Int = allRows.length
 
   /**
    * Get a column by name returned by the CQL statement.
