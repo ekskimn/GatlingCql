@@ -25,7 +25,7 @@ package io.github.gatling.cql.request
 import com.datastax.driver.core.Statement
 import com.google.common.util.concurrent.{Futures, MoreExecutors}
 import io.gatling.commons.stats.KO
-import io.gatling.commons.util.Clock
+import io.gatling.commons.util.{Clock, DefaultClock}
 import io.gatling.commons.validation.Validation
 import io.gatling.core.action.{Action, ExitableAction}
 import io.gatling.core.session.Session
@@ -37,6 +37,7 @@ class CqlRequestAction(val name: String, val next: Action, components: CqlCompon
 
   def execute(session: Session): Unit = {
     val stmt: Validation[Statement] = attr.statement(session)
+    val clock: DefaultClock = new DefaultClock
 
     stmt.onFailure(err => {
       statsEngine.logResponse(session, name, clock.nowMillis, clock.nowMillis, KO, None, Some("Error" +
@@ -55,7 +56,7 @@ class CqlRequestAction(val name: String, val next: Action, components: CqlCompon
     })
   }
 
-  override def clock: Clock = components.coreComponents.clock
-
   override def statsEngine: StatsEngine = components.coreComponents.statsEngine
+
+  override def clock: Clock = components.coreComponents.clock
 }
