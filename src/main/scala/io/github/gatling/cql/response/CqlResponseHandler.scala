@@ -28,7 +28,7 @@ import com.datastax.driver.core.{ResultSet, Statement}
 import com.google.common.util.concurrent.FutureCallback
 import com.typesafe.scalalogging.StrictLogging
 import io.gatling.commons.stats._
-import io.gatling.commons.util.Clock
+import io.gatling.commons.util.DefaultClock
 import io.gatling.commons.validation.Failure
 import io.gatling.core.action.Action
 import io.gatling.core.check.Check
@@ -39,17 +39,18 @@ import io.github.gatling.cql.checks.CqlCheck
 
 
 class CqlResponseHandler(next: Action, session: Session, system: ActorSystem, statsEngine: StatsEngine, start: Long, tag: String, stmt: Statement, checks: List[CqlCheck])
-  extends FutureCallback[ResultSet] with StrictLogging with Clock {
+  extends FutureCallback[ResultSet] with StrictLogging {
+  val clock: DefaultClock = new DefaultClock
 
   private def writeData(status: Status, respTimings: ResponseTimings, message: Option[String]): Unit =
     statsEngine.logResponse(session, tag, respTimings.startTimestamp, respTimings.endTimestamp, status, None, message)
 
   def onSuccess(resultSet: ResultSet): Unit = {
     val response = new CqlResponse(resultSet)
-    val respTimings = ResponseTimings(start, nowMillis)
+    val respTimings = ResponseTimings(start, clock.nowMillis)
 
     system.dispatcher.execute(() => {
-      val checkRes: (Session, Option[Failure]) = Check.check(response = response, session = session, checks = checks, preparedCache = null)
+      val checkRes: (Session, Option[Failure]) = Check.check(response, session, checks, preparedCache = null)
 
       if (checkRes._2.isEmpty) {
         writeData(OK, respTimings, None)
@@ -66,7 +67,7 @@ class CqlResponseHandler(next: Action, session: Session, system: ActorSystem, st
   }
 
   def onFailure(t: Throwable): Unit = {
-    val respTimings = ResponseTimings(start, nowMillis)
+    val respTimings = ResponseTimings(start, clock.nowMillis)
 
     system.dispatcher.execute(() => {
       if (t.isInstanceOf[DriverException]) {
@@ -81,6 +82,4 @@ class CqlResponseHandler(next: Action, session: Session, system: ActorSystem, st
       next ! session.markAsFailed
     })
   }
-
-  def nowMillis: Long = System.nanoTime
 }
