@@ -1,8 +1,8 @@
 schemaVersion: 2.0
 
 machine:
-  java:
-    version: 1.8
+  env:
+    RUNTIME_JDK_VERSION: 11
 
 notify:
   email:
