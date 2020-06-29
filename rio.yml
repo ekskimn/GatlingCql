@@ -2,6 +2,10 @@ schemaVersion: 2.0
 
 timeout: 30
 
+machine:
+  env:
+    RUNTIME_JDK_VERSION: 11
+
 pipelines:
   - branchName: master
     build:
