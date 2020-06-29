@@ -13,5 +13,5 @@ pipelines:
       template: buildozer:v4:publish
     package:
       libraries:
-        - publish:
-            repo: m2:health
+      - publish:
+          repo: m2:health
