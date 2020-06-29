@@ -1,68 +1,16 @@
 schemaVersion: 2.0
 
-machine:
-  env:
-    RUNTIME_JDK_VERSION: 11
+timeout: 30
 
-notify:
-  email:
-    enabled: false
-    recipients: ['galaxy-server-qe@group.apple.com']
-    buildFailuresToIndividuals: true
-    packageSuccessToDevelopers: true
-  pullRequestComment:
-    postOnSuccess: true
-    postOnFailure: true
-
-builds:
-  - # CI/CD Release build PROD
-    branchName: master
-
-    trigger:
-      gitPush: false
-
+pipelines:
+  - branchName: master
     build:
-      template: buildozer:v1:publish
-      autoDistWorkspace: false
-      builders: ['java-maven-rio']
+      template: buildozer:v4:prb
 
-    machine:
-      env:
-        snapshot: false
-
-    publish:
-      emailRecipients: ['galaxy-server-qe@group.apple.com']
-      release: true
-      libraries:
-        repo:
-          m2:health
-
-    finally:
-      rioPublisher: true
-
-  - # CI/CD Non release build DEV
-    branchName: master
-
-    trigger:
-      gitPush: false
-
+  - branchName: master
     build:
-      template: buildozer:v1:publish
-      autoDistWorkspace: false
-      builders: ['java-maven-rio']
-
-    machine:
-      env:
-        snapshot: false
-
-    publish:
-      emailRecipients: ['galaxy-server-qe@group.apple.com']
-      release: false
-      releaseTrain: 'SNAPSHOT'
+      template: buildozer:v4:publish
+    package:
       libraries:
-        repo:
-          m2:health
-
-    finally:
-      rioPublisher: true
-
+      - publish:
+        - repo: m2:health

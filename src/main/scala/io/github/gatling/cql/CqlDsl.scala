@@ -33,7 +33,7 @@ import scala.annotation.implicitNotFound
 trait CqlDsl extends CqlCheckSupport {
   val cql: CqlProtocolBuilder.type = CqlProtocolBuilder
 
-  def cql(tag: String) = CqlRequestBuilderBase(tag)
+  def cql(tag: String): CqlRequestBuilderBase = CqlRequestBuilderBase(tag)
 
   implicit def cqlProtocolBuilder2cqlProtocol(builder: CqlProtocolBuilder): CqlProtocol = builder.build
   implicit def cqlRequestBuilder2ActionBuilder(builder: CqlRequestBuilder): ActionBuilder = builder.build()
