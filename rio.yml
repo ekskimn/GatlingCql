@@ -3,8 +3,7 @@ schemaVersion: 2.0
 timeout: 30
 
 pipelines:
-  - # pull request build
-    branchName: master
+  - branchName: master
     build:
       template: buildozer:v4:prb
 
@@ -14,4 +13,4 @@ pipelines:
     package:
       libraries:
       - publish:
-          repo: m2:health
+        - repo: m2:health
